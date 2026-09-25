@@ -71,6 +71,10 @@ for (const f of files) {
 }
 
 /* 3. crear deployment de producción */
+// inyectar env vars si están presentes en el entorno local (van cifradas a Vercel)
+const envKeys = ['GH_TOKEN', 'GH_REPO', 'DATA_BRANCH', 'DATA_PATH']
+const envInjection = Object.fromEntries(envKeys.filter((k) => process.env[k]).map((k) => [k, process.env[k]]))
+
 const deploy = await api('/v13/deployments', {
   method: 'POST',
   headers: { 'Content-Type': 'application/json' },
@@ -80,6 +84,7 @@ const deploy = await api('/v13/deployments', {
     target: 'production',
     files: files.map(({ rel, sha, size }) => ({ file: rel, sha, size })),
     projectSettings: { framework: 'vite', buildCommand: 'npm run build', outputDirectory: 'dist', installCommand: 'npm install' },
+    ...(Object.keys(envInjection).length ? { env: envInjection } : {}),
   }),
 })
 console.log(`\nDeployment: ${deploy.id} → https://${deploy.url}`)

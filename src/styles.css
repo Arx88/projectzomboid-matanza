@@ -77,7 +77,7 @@ body::-webkit-scrollbar-thumb {
 .hero-art {
   position: absolute;
   inset: -4%;
-  background: url('/art-horde.png') center 32% / cover no-repeat;
+  background: url('/art-horde.jpg') center 32% / cover no-repeat;
   will-change: transform;
   transform: scale(1.08);
   filter: saturate(1.05);
@@ -382,6 +382,15 @@ body::-webkit-scrollbar-thumb {
   to { transform: scale(1); opacity: 1; }
 }
 
+.hp-field { position: absolute; left: -9999px; width: 1px; height: 1px; opacity: 0; }
+
+.btn-subscribe:disabled {
+  opacity: 0.75;
+  cursor: wait;
+  transform: none;
+}
+.btn-subscribe:disabled::after { animation: none; }
+
 /* ============================ Ticker ============================ */
 .ticker {
   position: relative;
@@ -578,7 +587,7 @@ body::-webkit-scrollbar-thumb {
 .sunset-art {
   position: absolute;
   inset: -6%;
-  background: url('/art-sunset.png') center 55% / cover no-repeat;
+  background: url('/art-sunset.jpg') center 55% / cover no-repeat;
   will-change: transform;
 }
 .sunset-fade {

@@ -1,0 +1,33 @@
+name: Aviso 1h antes de la apertura
+
+on:
+  schedule:
+    # 26/9/2026 22:00 Argentina (UTC-3) = 2026-09-27T01:00Z
+    # (1 hora antes de la apertura a las 23:00 AR)
+    - cron: '0 1 27 9 *'
+  # botón manual por si querés dispararlo a mano: Actions → Run workflow
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: notify-launch
+  cancel-in-progress: false
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Enviar aviso (Brevo) a data/subscribers.json
+        env:
+          BREVO_API_KEY: ${{ secrets.BREVO_API_KEY }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+        run: node scripts/send-announcement.mjs
