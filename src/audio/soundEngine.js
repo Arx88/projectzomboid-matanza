@@ -247,17 +247,20 @@ function setEnabled(v) {
   notify()
 }
 
-// Retomar la preferencia guardada: el contexto necesita un gesto del usuario,
-// así que el primer pointerdown en cualquier lado lo enciende.
+// El sonido arranca ENCENDIDO por default: el contexto de audio necesita un
+// gesto del usuario, así que el primer pointerdown en cualquier lado lo enciende.
+// Si el usuario apagó el sonido explícitamente, respetamos esa elección.
+let soundOnByDefault = true
 try {
-  if (localStorage.getItem(STORE_KEY) === '1') {
-    const kick = () => {
-      document.removeEventListener('pointerdown', kick)
-      setEnabled(true)
-    }
-    document.addEventListener('pointerdown', kick)
-  }
+  soundOnByDefault = localStorage.getItem(STORE_KEY) !== '0'
 } catch { /* ignore */ }
+if (soundOnByDefault) {
+  const kick = () => {
+    document.removeEventListener('pointerdown', kick)
+    setEnabled(true)
+  }
+  document.addEventListener('pointerdown', kick)
+}
 
 export const sound = {
   get enabled() {

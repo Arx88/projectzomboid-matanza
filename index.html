@@ -10,6 +10,8 @@
     />
     <meta name="theme-color" content="#0a0908" />
     <link rel="icon" type="image/png" href="/favicon.png" />
+    <link rel="preload" as="image" href="/art-horde.jpg" fetchpriority="high" />
+    <link rel="preload" as="image" href="/logo.png" />
     <meta property="og:title" content="LA MATANZA — Servidor de Project Zomboid" />
     <meta property="og:description" content="Comunidad, caos y supervivencia. Unite a LA MATANZA." />
     <meta property="og:image" content="/art-horde.jpg" />
@@ -23,5 +25,17 @@
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
+    <script>
+      // Easter egg para los curiosos que abren la consola 🧟
+      console.log(
+        "%c🧟 LA MATANZA%c\nEl servidor abre el sábado 26/09 a las 23:00 hs (Argentina).\nNo vas a sobrevivir sola. Traé amigos.",
+        "font-size:20px;font-weight:800;color:#ff6b35;text-shadow:0 0 12px rgba(255,107,53,.6)",
+        "font-size:12px;line-height:1.8;color:#f0e6d2"
+      )
+      console.log(
+        "%cUnite al Discord → https://discord.gg/jv7Dv9872",
+        "color:#5865f2;font-weight:700"
+      )
+    </script>
   </body>
 </html>

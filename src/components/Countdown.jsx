@@ -54,6 +54,8 @@ export default function Countdown() {
     [time],
   )
 
+  const isSoon = time.d === 0
+
   if (time.done) {
     return (
       <div className="countdown" data-reveal>
@@ -66,8 +68,12 @@ export default function Countdown() {
 
   return (
     <div className="countdown" data-reveal>
-      <p className="countdown-title">Cuenta regresiva para la apertura</p>
-      <div className="countdown-grid" role="timer" aria-live="off">
+      <p className="countdown-title">{isSoon ? '¡La apertura es hoy!' : 'Cuenta regresiva para la apertura'}</p>
+      <p className="countdown-date">
+        Sábado 26/09 · 23:00 hs AR
+        <span className="cd-live-dot" aria-hidden="true" />
+      </p>
+      <div className={`countdown-grid ${isSoon ? 'is-soon' : ''}`} role="timer" aria-live="off">
         {units.map((u) => (
           <div className={`cd-cell ${u.key === 's' && pulse ? 'is-tick' : ''}`} key={u.key}>
             <span className="cd-value">

@@ -30,12 +30,22 @@ const FEATURES = [
 ]
 
 export default function Features() {
-  // Estela de luz que sigue al mouse dentro de cada card (via CSS vars --mx/--my)
+  // Estela de luz + tilt 3D sutil que sigue al mouse en cada card
   const onCardMove = (e) => {
     const el = e.currentTarget
     const r = el.getBoundingClientRect()
-    el.style.setProperty('--mx', `${((e.clientX - r.left) / r.width) * 100}%`)
-    el.style.setProperty('--my', `${((e.clientY - r.top) / r.height) * 100}%`)
+    const nx = (e.clientX - r.left) / r.width
+    const ny = (e.clientY - r.top) / r.height
+    el.style.setProperty('--mx', `${nx * 100}%`)
+    el.style.setProperty('--my', `${ny * 100}%`)
+    el.style.setProperty('--rx', `${(0.5 - ny) * 5}deg`)
+    el.style.setProperty('--ry', `${(nx - 0.5) * 7}deg`)
+  }
+
+  const onCardLeave = (e) => {
+    const el = e.currentTarget
+    el.style.setProperty('--rx', '0deg')
+    el.style.setProperty('--ry', '0deg')
   }
 
   return (
@@ -53,6 +63,7 @@ export default function Features() {
             key={f.id}
             data-reveal
             onMouseMove={onCardMove}
+            onMouseLeave={onCardLeave}
             style={{ '--d': `${i * 90}ms`, '--accent': f.accent }}
           >
             <div className="feature-img-wrap">
