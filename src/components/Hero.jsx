@@ -6,52 +6,76 @@ import { sound } from '../audio/soundEngine.js'
 const LOGO_URL = '/logo.png'
 
 export default function Hero() {
+  const rootRef = useRef(null)
   const artRef = useRef(null)
-  const [tilt, setTilt] = useState({ x: 0, y: 0 })
-  const [scrollY, setScrollY] = useState(0)
+  const contentRef = useRef(null)
+  const logoRef = useRef(null)
+  const [isScrolled, setIsScrolled] = useState(false)
   const [copied, setCopied] = useState(false)
 
-  // Parallax con el mouse (solo dispositivos con puntero fino)
+  // Parallax con el mouse + scroll: escritura DIRECTA sobre el DOM (refs),
+  // sin setState → cero re-renders → cero parpadeo.
   useEffect(() => {
-    if (window.matchMedia('(pointer: coarse)').matches) return undefined
-    const el = artRef.current
-    if (!el) return undefined
+    const fine = !window.matchMedia('(pointer: coarse)').matches
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    if (reduce) return undefined
+
+    const root = rootRef.current
+    const art = artRef.current
+    const content = contentRef.current
+    const logo = logoRef.current
+    if (!root || !art || !content || !logo) return undefined
+
+    let mx = 0
+    let my = 0
+    let scrollY = window.scrollY
     let raf = 0
-    const onMove = (e) => {
-      cancelAnimationFrame(raf)
-      raf = requestAnimationFrame(() => {
-        const r = el.getBoundingClientRect()
-        const nx = (e.clientX - r.left) / r.width - 0.5
-        const ny = (e.clientY - r.top) / r.height - 0.5
-        setTilt({ x: nx, y: ny })
-      })
+
+    const apply = () => {
+      raf = 0
+      // fondo: contramovimiento + parallax de scroll
+      art.style.transform = `scale(1.08) translate3d(${mx * -14}px, ${my * -10 + scrollY * 0.22}px, 0)`
+      // contenido: movimiento leve opuesto (profundidad)
+      content.style.transform = `translate3d(${mx * 8}px, ${my * 6}px, 0)`
+      // logo: el más pronunciado
+      logo.style.transform = `translate3d(${mx * 18}px, ${my * 14}px, 0) rotate(${mx * 0.8}deg)`
+      // clase scrolled para el header
+      root.classList.toggle('is-scrolled', scrollY > 40)
     }
-    const onLeave = () => setTilt({ x: 0, y: 0 })
+
+    const schedule = () => {
+      if (!raf) raf = requestAnimationFrame(apply)
+    }
+
+    const onMove = (e) => {
+      if (!fine) return
+      const r = root.getBoundingClientRect()
+      mx = (e.clientX - r.left) / r.width - 0.5
+      my = (e.clientY - r.top) / r.height - 0.5
+      schedule()
+    }
+    const onLeave = () => {
+      mx = 0
+      my = 0
+      schedule()
+    }
+    const onScroll = () => {
+      scrollY = window.scrollY
+      schedule()
+    }
+
     window.addEventListener('mousemove', onMove, { passive: true })
-    el.addEventListener('mouseleave', onLeave)
+    window.addEventListener('scroll', onScroll, { passive: true })
+    root.addEventListener('mouseleave', onLeave)
+    apply()
+
     return () => {
       cancelAnimationFrame(raf)
       window.removeEventListener('mousemove', onMove)
-      el.removeEventListener('mouseleave', onLeave)
-    }
-  }, [])
-
-  // Parallax de scroll + fade del hero
-  useEffect(() => {
-    let raf = 0
-    const onScroll = () => {
-      cancelAnimationFrame(raf)
-      raf = requestAnimationFrame(() => setScrollY(window.scrollY))
-    }
-    window.addEventListener('scroll', onScroll, { passive: true })
-    return () => {
-      cancelAnimationFrame(raf)
       window.removeEventListener('scroll', onScroll)
+      root.removeEventListener('mouseleave', onLeave)
     }
   }, [])
-
-  const mx = tilt.x
-  const my = tilt.y
 
   // Botón compartir: API nativa en mobile, copia al portapapeles en desktop
   const share = async () => {
@@ -74,26 +98,21 @@ export default function Hero() {
   }
 
   return (
-    <header className={`hero ${scrollY > 40 ? 'is-scrolled' : ''}`} ref={artRef}>
-      <div
-        className="hero-art"
-        style={{
-          transform: `scale(1.08) translate3d(${mx * -14}px, ${my * -10 + scrollY * 0.22}px, 0)`,
-        }}
-      >
+    <header className="hero" ref={rootRef}>
+      <div className="hero-art" ref={artRef}>
         <div className="hero-art-zoom" aria-hidden="true" />
       </div>
       <div className="hero-vignette" aria-hidden="true" />
       <div className="hero-grain" aria-hidden="true" />
 
-      <div className="hero-content" style={{ transform: `translate3d(${mx * 8}px, ${my * 6}px, 0)` }}>
+      <div className="hero-content" ref={contentRef}>
         <span className="hero-logo-wrap">
           <img
             className="hero-logo"
             src={LOGO_URL}
             alt="LA MATANZA"
             draggable="false"
-            style={{ transform: `translate3d(${mx * 18}px, ${my * 14}px, 0) rotate(${mx * 0.8}deg)` }}
+            ref={logoRef}
           />
           <span className="logo-sweep" aria-hidden="true" />
         </span>

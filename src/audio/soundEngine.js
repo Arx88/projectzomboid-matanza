@@ -4,7 +4,8 @@
 // - click()     : "thock" grave al presionar
 // - música      : drone ambiental + melodía esparcida en La menor, estilo PZ
 
-const STORE_KEY = 'lamatanza-sound'
+// v2: la clave vieja guardaba '0' de cuando el default era apagado — la ignoramos
+const STORE_KEY = 'lamatanza-sound-v2'
 
 let ctx = null
 let master = null
@@ -247,19 +248,26 @@ function setEnabled(v) {
   notify()
 }
 
-// El sonido arranca ENCENDIDO por default: el contexto de audio necesita un
-// gesto del usuario, así que el primer pointerdown en cualquier lado lo enciende.
-// Si el usuario apagó el sonido explícitamente, respetamos esa elección.
-let soundOnByDefault = true
+// SONIDO ENCENDIDO POR DEFAULT.
+// - Intenta arrancar ya mismo (algunos navegadores lo permiten sin gesto previo).
+// - Si el contexto queda suspendido, el primer gesto del usuario (click, tecla o
+//   touch en cualquier lado) lo enciende.
+// - Solo se respeta el silencio si el usuario apagó el sonido explícitamente ('0').
+let wantsSound = true
 try {
-  soundOnByDefault = localStorage.getItem(STORE_KEY) !== '0'
+  wantsSound = localStorage.getItem(STORE_KEY) !== '0'
 } catch { /* ignore */ }
-if (soundOnByDefault) {
+if (wantsSound) {
+  setEnabled(true)
   const kick = () => {
-    document.removeEventListener('pointerdown', kick)
-    setEnabled(true)
+    if (!enabled) setEnabled(true)
+    document.removeEventListener('pointerdown', kick, true)
+    document.removeEventListener('keydown', kick, true)
+    document.removeEventListener('touchstart', kick, true)
   }
-  document.addEventListener('pointerdown', kick)
+  document.addEventListener('pointerdown', kick, true)
+  document.addEventListener('keydown', kick, true)
+  document.addEventListener('touchstart', kick, true)
 }
 
 export const sound = {
