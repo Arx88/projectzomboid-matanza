@@ -124,11 +124,17 @@ const main = async () => {
 
   const subs = await getFile(DATA_PATH)
   const list = subs.data || []
-  if (!list.length) {
+  if (!list.length && !process.env.OVERRIDE_RECIPIENTS) {
     console.log('No hay suscriptores; nada que enviar.')
     return
   }
-  const recipients = list.map((s) => ({ email: s.email }))
+  let recipients = list.map((s) => ({ email: s.email }))
+  const TEST_MODE = Boolean(process.env.OVERRIDE_RECIPIENTS)
+  if (TEST_MODE) {
+    // modo prueba: solo a estas casillas, no escribe el marker ni toca la lista
+    recipients = process.env.OVERRIDE_RECIPIENTS.split(',').map((e) => ({ email: e.trim() })).filter((r) => r.email)
+    console.log(`🧪 MODO PRUEBA: ${recipients.length} destinatario(s) de reemplazo (no se escribe marker)`)
+  }
   console.log(`Suscriptores: ${recipients.length}`)
 
   if (DRY) {
@@ -140,7 +146,7 @@ const main = async () => {
   const apiKey = process.env.BREVO_API_KEY
   if (!apiKey) throw new Error('Falta BREVO_API_KEY')
   const sender = {
-    email: process.env.SENDER_EMAIL || 'juampi.valastro88@gmail.com',
+    email: process.env.SENDER_EMAIL || 'somosarcadian@gmail.com',
     name: process.env.SENDER_NAME || 'LA MATANZA',
   }
 
@@ -155,12 +161,16 @@ const main = async () => {
     console.log(`  tanda ${i + 1}/${batches.length}: OK messageId=${out.messageId || '?'}`)
   }
 
-  await putFile(
-    MARKER_PATH,
-    { sent: new Date().toISOString(), count: sent, batches: batches.length },
-    'chore: marker de aviso enviado',
-  )
-  console.log(`✅ Enviado a ${sent} destinatarios. Marker guardado.`)
+  if (!TEST_MODE) {
+    await putFile(
+      MARKER_PATH,
+      { sent: new Date().toISOString(), count: sent, batches: batches.length },
+      'chore: marker de aviso enviado',
+    )
+    console.log(`✅ Enviado a ${sent} destinatarios. Marker guardado.`)
+  } else {
+    console.log(`✅ PRUEBA enviada a ${sent} casilla(s). Marker NO escrito (el envío real del 26/9 queda habilitado).`)
+  }
 }
 
 main().catch((e) => {
