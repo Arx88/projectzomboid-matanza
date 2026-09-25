@@ -19,6 +19,7 @@ const BRANCH = 'main'
 const DATA_PATH = 'data/subscribers.json'
 const MARKER_PATH = 'data/.announcement-sent.json'
 const SITE = 'https://projectzomboid-matanza.vercel.app'
+const DISCORD_URL = 'https://discord.gg/jv7Dv9872'
 
 const API = 'https://api.github.com'
 const gh = async (path, opts = {}) => {
@@ -75,7 +76,15 @@ const buildHtml = () => `<!doctype html>
             LA MATANZA abre sus puertas a las <strong style="color:#f2e6c9;">23:00 hs</strong> (Argentina).<br>
             Prepará tu equipo, revisá tus mods y entrá temprano para asegurar tu lugar.
           </p>
-          <a href="${SITE}" style="display:inline-block;background:#c1121f;color:#ffffff;text-decoration:none;font-weight:bold;font-size:16px;padding:14px 34px;border-radius:12px;">Ver el sitio</a>
+          <table role="presentation" cellpadding="0" cellspacing="0" align="center" style="margin:0 auto;">
+            <tr>
+              <td style="background:#5865f2;border-radius:12px;">
+                <a href="${DISCORD_URL}" target="_blank" style="display:inline-block;padding:15px 34px;color:#ffffff;text-decoration:none;font-weight:bold;font-size:16px;font-family:Arial,Helvetica,sans-serif;">
+                  <img src="${SITE}/discord-icon.png" alt="" width="20" height="20" style="vertical-align:middle;border:0;margin-right:10px;">Unirse al Discord
+                </a>
+              </td>
+            </tr>
+          </table>
           <p style="margin:22px 0 0;color:#8a7f6b;font-size:12px;line-height:1.6;">
             Comunidad, caos y supervivencia.<br>
             Recibís este mail porque te inscribiste en ${SITE}
@@ -90,7 +99,7 @@ const buildText = () =>
   `FALTA 1 HORA — ¡LA MATANZA ABRE!\n\n` +
   `El servidor abre hoy a las 23:00 hs (Argentina).\n` +
   `Prepará tu equipo y entrá temprano.\n\n` +
-  `${SITE}\n`
+  `Unite al Discord: ${DISCORD_URL}\n`
 
 async function sendWithBrevo(recipients, apiKey, sender) {
   const res = await fetch('https://api.brevo.com/v3/smtp/email', {
