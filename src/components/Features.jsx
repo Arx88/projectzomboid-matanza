@@ -42,7 +42,7 @@ export default function Features() {
     <section className="features" id="features">
       <div className="features-head" data-reveal>
         <span className="rule" aria-hidden="true" />
-        <h2>Servidor para amigos y conocidos</h2>
+        <h2>Servidor cuidadozamente balanceado</h2>
         <span className="rule" aria-hidden="true" />
       </div>
 
