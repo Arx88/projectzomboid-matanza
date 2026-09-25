@@ -57,12 +57,30 @@ async function readSubscribers() {
   return { list, sha: r.data.sha }
 }
 
+// Vercel puede entregar req.body como objeto, string, o nada (stream) — cubrir los 3 casos
+function parseBody(req) {
+  if (req.body) {
+    if (typeof req.body === 'string') {
+      try { return JSON.parse(req.body) } catch { return null }
+    }
+    return req.body
+  }
+  return new Promise((resolve) => {
+    let raw = ''
+    req.on('data', (c) => (raw += c))
+    req.on('end', () => {
+      try { resolve(JSON.parse(raw || '{}')) } catch { resolve(null) }
+    })
+    req.on('error', () => resolve(null))
+  })
+}
+
 export default async function handler(req, res) {
   if (req.method !== 'POST') return json(res, 405, { error: 'method' })
   if (!GH_TOKEN) return json(res, 500, { error: 'server_not_configured' })
 
-  let body
-  try { body = JSON.parse(req.body || '{}') } catch { return json(res, 400, { error: 'bad_json' }) }
+  const body = await parseBody(req)
+  if (!body) return json(res, 400, { error: 'bad_json' })
 
   const email = cleanEmail(body.email)
   if (!email) return json(res, 400, { error: 'invalid_email' })
